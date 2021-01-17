@@ -4,6 +4,12 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.palchak.sergey.kotlincoroutines.databinding.ActivityMainBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+private const val RESULT_1 = "Result #1"
 
 class MainActivity : AppCompatActivity() {
 
@@ -15,6 +21,24 @@ class MainActivity : AppCompatActivity() {
 
         binding.button.setOnClickListener {
 
+            CoroutineScope(IO).launch {
+                fakeApiRequest()
+            }
         }
+    }
+
+    private suspend fun fakeApiRequest() {
+        val result1 = getResult1FromApi()
+        println("debug: $result1")
+    }
+
+    private suspend fun getResult1FromApi(): String {
+        logThread("getResult1FromApi")
+        delay(1000)
+        return RESULT_1
+    }
+
+    private fun logThread(methodName: String) {
+        println("debug: $methodName: ${Thread.currentThread().name}")
     }
 }
