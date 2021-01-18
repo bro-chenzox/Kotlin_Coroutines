@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private const val RESULT_1 = "Result #1"
+private const val RESULT_2 = "Result #2"
 
 class MainActivity : AppCompatActivity() {
 
@@ -44,12 +45,22 @@ class MainActivity : AppCompatActivity() {
         val result1 = getResult1FromApi()
         println("debug: $result1")
         setTextonMainThread(result1)
+
+        val result2 = getResult2FromApi()
+        println("debug: $result2")
+        setTextonMainThread(result2)
     }
 
     private suspend fun getResult1FromApi(): String {
         logThread("getResult1FromApi")
         delay(1000)
         return RESULT_1
+    }
+
+    private suspend fun getResult2FromApi(): String {
+        logThread("getResult2FromApi")
+        delay(1000)
+        return RESULT_2
     }
 
     private fun logThread(methodName: String) {
