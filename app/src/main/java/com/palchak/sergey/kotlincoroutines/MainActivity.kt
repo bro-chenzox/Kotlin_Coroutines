@@ -4,15 +4,13 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.palchak.sergey.kotlincoroutines.databinding.ActivityMainBinding
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 private const val RESULT_1 = "Result #1"
 private const val RESULT_2 = "Result #2"
+private const val JOB_TIMEOUT = 1900L
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,9 +21,26 @@ class MainActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         binding.button.setOnClickListener {
+            setNewText("Click!")
+            fakeApiRequest()
+        }
+    }
 
-            CoroutineScope(IO).launch {
-                fakeApiRequest()
+    private fun fakeApiRequest() {
+        CoroutineScope(IO).launch {
+            val job = withTimeoutOrNull(JOB_TIMEOUT) {
+                val result1 = getResult1FromApi()
+                println("debug: $result1")
+                setTextonMainThread(result1)
+
+                val result2 = getResult2FromApi()
+                println("debug: $result2")
+                setTextonMainThread(result2)
+            }
+            if (job == null) {
+                val cancelMessage = "Cancelling Job...Job took longer than $JOB_TIMEOUT ms"
+                println("debug: $cancelMessage")
+                setTextonMainThread(cancelMessage)
             }
         }
     }
@@ -39,16 +54,6 @@ class MainActivity : AppCompatActivity() {
         withContext(Main) {
             setNewText(input)
         }
-    }
-
-    private suspend fun fakeApiRequest() {
-        val result1 = getResult1FromApi()
-        println("debug: $result1")
-        setTextonMainThread(result1)
-
-        val result2 = getResult2FromApi()
-        println("debug: $result2")
-        setTextonMainThread(result2)
     }
 
     private suspend fun getResult1FromApi(): String {
