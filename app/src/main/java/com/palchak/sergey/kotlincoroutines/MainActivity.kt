@@ -4,12 +4,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
 import com.palchak.sergey.kotlincoroutines.databinding.ActivityMainBinding
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.system.measureTimeMillis
 
 class MainActivity : AppCompatActivity() {
@@ -29,28 +26,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun fakeApiRequest() {
 
-        val startTime = System.currentTimeMillis()
+        CoroutineScope(IO).launch {
+            val executionTime = measureTimeMillis {
+                val result1: Deferred<String> = async {
+                    println("debug: launching job1 on tread ${Thread.currentThread().name}")
+                    getResult1FromApi()
+                }
 
-        val parentJob = CoroutineScope(IO).launch {
-            val job1 = launch {
-                val time1 = measureTimeMillis {
-                    println("debug: Launching job1 in thread ${Thread.currentThread().name}")
-                    val result1 = getResult1FromApi()
-                    setTextOnMainThread(result1)
+                val result2: Deferred<String> = async {
+                    println("debug: launching job2 on tread ${Thread.currentThread().name}")
+                    getResult2FromApi()
                 }
-                println("debug: Completed job1 in $time1 ms")
+
+                setTextOnMainThread(result1.await())
+                setTextOnMainThread(result2.await())
             }
-            val job2 = launch {
-                val time2 = measureTimeMillis {
-                    println("debug: Launching job2 in thread ${Thread.currentThread().name}")
-                    val result2 = getResult2FromApi()
-                    setTextOnMainThread(result2)
-                }
-                println("debug: Completed job1 in $time2 ms")
-            }
-        }
-        parentJob.invokeOnCompletion {
-            println("debug: Total elapsed time: ${System.currentTimeMillis() - startTime}")
+            println("debug: Total elapsed time is $executionTime ms")
         }
     }
 
