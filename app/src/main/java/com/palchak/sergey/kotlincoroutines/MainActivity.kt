@@ -1,7 +1,7 @@
 package com.palchak.sergey.kotlincoroutines
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.palchak.sergey.kotlincoroutines.databinding.ActivityMainBinding
 import kotlinx.coroutines.*
@@ -25,21 +25,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun fakeApiRequest() {
-
         CoroutineScope(IO).launch {
             val executionTime = measureTimeMillis {
-                val result1: Deferred<String> = async {
-                    println("debug: launching job1 on tread ${Thread.currentThread().name}")
-                    getResult1FromApi()
-                }
+                val result1 =
+                    withContext(IO) {
+                        println("debug: Launching job #1 on thread ${Thread.currentThread().name}")
+                        getResult1FromApi()
+                    }
 
-                val result2: Deferred<String> = async {
-                    println("debug: launching job2 on tread ${Thread.currentThread().name}")
-                    getResult2FromApi()
-                }
-
-                setTextOnMainThread(result1.await())
-                setTextOnMainThread(result2.await())
+                val result2 =
+                    withContext(IO) {
+                        println("debug: Launching job #2 on thread ${Thread.currentThread().name}")
+                        getResult2FromApi(result1)
+                    }
+                println("debug: got result2 $result2")
             }
             println("debug: Total elapsed time is $executionTime ms")
         }
@@ -61,8 +60,11 @@ class MainActivity : AppCompatActivity() {
         return "Result1"
     }
 
-    private suspend fun getResult2FromApi(): String {
+    private suspend fun getResult2FromApi(result: String): String {
         delay(1700)
-        return "Result2"
+        if (result == "Result1") {
+            return "Result2"
+        }
+        throw CancellationException("Result1 was incorrect...")
     }
 }
