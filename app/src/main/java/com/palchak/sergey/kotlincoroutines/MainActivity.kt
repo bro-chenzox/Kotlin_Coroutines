@@ -36,7 +36,11 @@ class MainActivity : AppCompatActivity() {
                 val result2 =
                     withContext(IO) {
                         println("debug: Launching job #2 on thread ${Thread.currentThread().name}")
-                        getResult2FromApi(result1)
+                        try {
+                            getResult2FromApi("fffhfuyig")
+                        } catch (e: CancellationException) {
+                            e.message
+                        }
                     }
                 println("debug: got result2 $result2")
             }
