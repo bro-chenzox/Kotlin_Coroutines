@@ -36,11 +36,7 @@ class MainActivity : AppCompatActivity() {
                 val result2 =
                     withContext(IO) {
                         println("debug: Launching job #2 on thread ${Thread.currentThread().name}")
-                        try {
-                            getResult2FromApi("fffhfuyig")
-                        } catch (e: CancellationException) {
-                            e.message
-                        }
+                        getResult2FromApi("fffhfuyig")
                     }
                 println("debug: got result2 $result2")
             }
@@ -69,6 +65,6 @@ class MainActivity : AppCompatActivity() {
         if (result == "Result1") {
             return "Result2"
         }
-        throw CancellationException("Result1 was incorrect...")
+        return "Result1 was incorrect..."
     }
 }
