@@ -3,10 +3,12 @@ package com.palchak.sergey.kotlincoroutines
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.Exception
 
 private const val TAG = "AppDebug"
 
@@ -18,8 +20,12 @@ class MainActivity : AppCompatActivity() {
         main()
     }
 
+    val handler = CoroutineExceptionHandler { _, exception ->
+        println("Exception thrown in one of the children: $exception")
+    }
+
     private fun main() {
-        val parentJob = CoroutineScope(IO).launch {
+        val parentJob = CoroutineScope(IO).launch(handler) {
 
             // ----------JOB A-----------
             val jobA = launch {
@@ -65,6 +71,7 @@ class MainActivity : AppCompatActivity() {
 
     private suspend fun getDouble(number: Int): Int {
         delay(500)
+        if (number == 2) throw Exception("Error getting result for number $number")
         return number * 2
     }
 
