@@ -24,36 +24,38 @@ class MainActivity : AppCompatActivity() {
     private fun main() {
         val parentJob = CoroutineScope(IO).launch(handler) {
 
-            // ----------JOB A-----------
-            val jobA = launch {
-                val resultA = getDouble(1)
-                println("resultA: $resultA")
-            }
-            jobA.invokeOnCompletion { throwable ->
-                if (throwable != null) {
-                    println("Error getting resultA: $throwable")
+            supervisorScope {
+                // ----------JOB A-----------
+                val jobA = launch {
+                    val resultA = getDouble(1)
+                    println("resultA: $resultA")
                 }
-            }
-
-            // ----------JOB B-----------
-            val jobB = launch {
-                val resultB= getDouble(2)
-                println("resultA: $resultB")
-            }
-            jobB.invokeOnCompletion { throwable ->
-                if (throwable != null) {
-                    println("Error getting resultB: $throwable")
+                jobA.invokeOnCompletion { throwable ->
+                    if (throwable != null) {
+                        println("Error getting resultA: $throwable")
+                    }
                 }
-            }
 
-            // ----------JOB C-----------
-            val jobC = launch {
-                val resultC = getDouble(3)
-                println("resultC: $resultC")
-            }
-            jobC.invokeOnCompletion { throwable ->
-                if (throwable != null) {
-                    println("Error getting resultC: $throwable")
+                // ----------JOB B-----------
+                val jobB = launch {
+                    val resultB= getDouble(2)
+                    println("resultA: $resultB")
+                }
+                jobB.invokeOnCompletion { throwable ->
+                    if (throwable != null) {
+                        println("Error getting resultB: $throwable")
+                    }
+                }
+
+                // ----------JOB C-----------
+                val jobC = launch {
+                    val resultC = getDouble(3)
+                    println("resultC: $resultC")
+                }
+                jobC.invokeOnCompletion { throwable ->
+                    if (throwable != null) {
+                        println("Error getting resultC: $throwable")
+                    }
                 }
             }
         }
